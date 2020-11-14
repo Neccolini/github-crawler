@@ -4,6 +4,7 @@ import sys
 import re
 import time
 import datetime
+from github import github, GITHUB_ACCESS_TOKEN
 
 """
 README.mdにpackage.jsonが含まれる, スター順でソート
@@ -11,17 +12,22 @@ README.mdにpackage.jsonが含まれる, スター順でソート
 def GetGitHubRepositories(language,max_num=100,sort="stars",download=False,dir=None,save_file=None):
     repos_list=[]
     page_iterator=1
+   
     while 1:
-        url="https://api.github.com/search/repositories?language:"+language+"&sort="+sort+"&page="+str(page_iterator)
+        url="https://api.github.com/search/repositories?q=language"+"language"+"&sort="+sort+"&page="+str(page_iterator)
         info=requests.get(url).text
         info_dict=json.loads(info)
         if "items" not in info_dict:
             if "message" in info_dict:
                 print(info_dict["message"])
+                if info_dict["message"]=="Validation Failed":
+                    print("url is wrong.")
+                    break
                 reset_time=GetResetTimeForGithub()
                 waitUntilReset(reset_time)
             else :
                 print("An error occured.")
+                break
             continue
         repos=info_dict["items"]
         for r in repos:
@@ -29,6 +35,8 @@ def GetGitHubRepositories(language,max_num=100,sort="stars",download=False,dir=N
                 break
             repos_list.append([r["name"],r["html_url"],r["default_branch"]])
         page_iterator+=1
+        if len(repos_list)>=max_num:
+            break
     if download==True:
         percentage=DownloadGithubAll(repos_list,dir,save_file)
         print("{}% repositories were Downloaded.".format(percentage))
@@ -88,4 +96,4 @@ def waitUntilReset(reset):
     sys.stdout.flush()
     time.sleep(seconds + 5)  # 念のため + 5 秒
 
-GetGitHubRepositories("package.json",max_num=10,download=True)
+GetGitHubRepositories("package.json",max_num=200,download=False)
