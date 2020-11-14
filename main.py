@@ -14,7 +14,7 @@ def GetGitHubRepositories(language,max_num=100,sort="stars",download=False,dir=N
     page_iterator=1
    
     while 1:
-        url="https://api.github.com/search/repositories?q=language"+"language"+"&sort="+sort+"&page="+str(page_iterator)
+        url="https://api.github.com/search/repositories?q=language"+language+"&sort="+sort+"&page="+str(page_iterator)
         info=requests.get(url).text
         info_dict=json.loads(info)
         if "items" not in info_dict:
