@@ -9,7 +9,8 @@ from github import GITHUB_ACCESS_TOKEN
 headers = {'Authorization': GITHUB_ACCESS_TOKEN}
 
 """
-README.mdにpackage.jsonが含まれる, スター順でソート
+language:指定する言語, max_num:取ってくるレポジトリーの数(<=1000), sort:ソートの基準, 
+download:zipファイルをダウンロードするかどうか, dir:ダウンロードするローカルディレクトリ, save_file:
 """
 def GetGitHubRepositories(language,max_num=100,sort="stars",download=False,dir=None,save_file=None):
     repos_list=[]
