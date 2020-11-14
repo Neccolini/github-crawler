@@ -4,7 +4,9 @@ import sys
 import re
 import time
 import datetime
-from github import github, GITHUB_ACCESS_TOKEN
+from github import GITHUB_ACCESS_TOKEN
+
+headers = {'Authorization': GITHUB_ACCESS_TOKEN}
 
 """
 README.mdにpackage.jsonが含まれる, スター順でソート
@@ -12,10 +14,9 @@ README.mdにpackage.jsonが含まれる, スター順でソート
 def GetGitHubRepositories(language,max_num=100,sort="stars",download=False,dir=None,save_file=None):
     repos_list=[]
     page_iterator=1
-   
     while 1:
         url="https://api.github.com/search/repositories?q=language"+language+"&sort="+sort+"&page="+str(page_iterator)
-        info=requests.get(url).text
+        info=requests.get(url,headers=headers).content    
         info_dict=json.loads(info)
         if "items" not in info_dict:
             if "message" in info_dict:
@@ -37,6 +38,7 @@ def GetGitHubRepositories(language,max_num=100,sort="stars",download=False,dir=N
         page_iterator+=1
         if len(repos_list)>=max_num:
             break
+    print(repos_list)
     if download==True:
         percentage=DownloadGithubAll(repos_list,dir,save_file)
         print("{}% repositories were Downloaded.".format(percentage))
@@ -80,7 +82,7 @@ def DownloadGithubAll(repos_list:list,dir=None,filename=None):
 
 def GetResetTimeForGithub(api_object="search"):
     url="https://api.github.com/rate_limit"
-    info=requests.get(url).text
+    info=requests.get(url,headers=headers).text
     info_dict=json.loads(info)
     print(info_dict)
     return int(info_dict["resources"][api_object]["reset"])
@@ -96,4 +98,4 @@ def waitUntilReset(reset):
     sys.stdout.flush()
     time.sleep(seconds + 5)  # 念のため + 5 秒
 
-GetGitHubRepositories("package.json",max_num=200,download=False)
+GetGitHubRepositories("package.json",max_num=10,download=False)
